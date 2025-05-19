@@ -1,0 +1,17 @@
+body {
+  background-color: black;
+  color: white;
+}
+
+main {
+  display: flex;
+  flex-direction: row;
+}
+
+#tree {
+  flex: 3;
+}
+
+#insertion-menu {
+  flex: 1;
+}
