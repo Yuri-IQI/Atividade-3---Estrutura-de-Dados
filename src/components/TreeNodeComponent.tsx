@@ -20,7 +20,7 @@ export const TreeNodeComponent: React.FC<TreeNodeComponentProps> = ({ onInsert }
     };
 
     return (
-        <div>
+        <div className='menu' >
             <label htmlFor="node-value">Enter Node Value:</label>
             <input
                 id="node-value"

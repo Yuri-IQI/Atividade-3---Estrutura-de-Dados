@@ -3,4 +3,6 @@ export type TreeNode = {
   value: number;
   left?: TreeNode | null;
   right?: TreeNode | null;
+  height?: number;
+  balance?: number;
 };
