@@ -21,13 +21,15 @@ export const TreeNodeComponent: React.FC<TreeNodeComponentProps> = ({ onInsert }
 
     return (
         <div className='menu' >
-            <label htmlFor="node-value">Enter Node Value:</label>
-            <input
-                id="node-value"
-                type="number"
-                value={value}
-                onChange={(e) => setValue(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
-            />
+            <span>
+                <label htmlFor="node-value">Enter Node Value:</label>
+                <input
+                    id="node-value"
+                    type="number"
+                    value={value}
+                    onChange={(e) => setValue(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
+                />
+            </span>
             <button onClick={handleSubmit}>Insert Node</button>
         </div>
     );

@@ -17,7 +17,6 @@ export const BinaryTree: React.FC<BinaryTreeProps> = ({ root }) => {
 
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
-    console.log(root);
 
     const hierarchyData = d3.hierarchy<TreeNode>(root, node => {
       const children: TreeNode[] = [];
