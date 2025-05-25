@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import type { TreeNode } from './types/TreeNode';
 import { BinaryTree } from './components/BinaryTree';
-import { handleInsertNode, handleRemoveNode } from './services/treeService';
 import { InsertNodeMenu } from './components/InsertNodeMenu';
 import { RemoveNodeMenu } from './components/RemoveNodeMenu';
+import { handleInsertNode, handleRemoveNode } from './services/treeService';
 
 const App: React.FC = () => {
   const [rootNode, setRootNode] = useState<TreeNode | null>(null);
