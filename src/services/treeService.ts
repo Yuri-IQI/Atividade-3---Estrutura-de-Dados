@@ -3,196 +3,116 @@ import type { TreeNode } from "../types/TreeNode";
 
 export const handleInsertNode = (
   newNode: TreeNode,
-  rootNode: TreeNode | null,
+  root: TreeNode | null,
   setRootNode: Dispatch<SetStateAction<TreeNode | null>>
 ) => {
-  if (!rootNode) {
+  if (!root) {
     newNode.id = `N0-${newNode.value}-N`;
     setRootNode(newNode);
-    return;
+  } else {
+    const updatedRoot = insertNode(root, newNode);
+    console.log('up', updatedRoot);
+    setRootNode({ ...updatedRoot });
   }
-
-  const path: TreeNode[] = [];
-  let current: TreeNode | null = rootNode;
-
-  while (current) {
-    path.push(current);
-    if (newNode.value === current.value) {
-      alert("A Node with this value already exists");
-      return;
-    }
-
-    if (newNode.value < current.value) {
-      if (!current.left) {
-        current.left = newNode;
-        newNode.id = `N${current.value}-${newNode.value}-L`;
-        break;
-      }
-      current = current.left;
-    } else {
-      if (!current.right) {
-        current.right = newNode;
-        newNode.id = `N${current.value}-${newNode.value}-R`;
-        break;
-      }
-      current = current.right;
-    }
-  }
-
-  let updatedTree;
-  updatedTree = getNodeHeight(rootNode);
-  updatedTree = getNodeBalance(updatedTree);
-
-  const pivot = findPivotFromPath(path);
-  const balancedSubTree = pivot ? balanceTree(pivot) : updatedTree;
-
-  const newRoot = reinsertSubtree(updatedTree, balancedSubTree, pivot);
-
-  setRootNode({ ...newRoot });
 };
 
-const findPivotFromPath = (path: TreeNode[]): TreeNode | null => {
-  for (let i = path.length - 1; i >= 0; i--) {
-    const node = path[i];
-    const balanceFactor = getBalanceFactor(node);
-    if (Math.abs(balanceFactor) > 1) {
-      return node;
-    }
-  }
-  return null;
+export const handleRemoveNode = (
+  value: number,
+  root: TreeNode | null,
+  setRootNode: Dispatch<SetStateAction<TreeNode | null>>
+) => {
+  const updatedRoot = deleteNode(structuredClone(root), value);
+
+  setRootNode(updatedRoot);
 };
 
-const getBalanceFactor = (node: TreeNode): number => {
-  const left = node.left?.height ?? 0;
-  const right = node.right?.height ?? 0;
-  return left - right;
-};
-
-const reinsertSubtree = (
-  tree: TreeNode,
-  subTree: TreeNode,
-  pivot: TreeNode | null
-): TreeNode => {
-  if (!pivot || tree === pivot) return subTree;
-
-  const traverse = (node: TreeNode): TreeNode => {
-    if (!node) return node;
-    if (node.left === pivot) {
-      node.left = subTree;
-    } else if (node.right === pivot) {
-      node.right = subTree;
-    } else {
-      if (pivot.value < node.value && node.left) {
-        node.left = traverse(node.left);
-      } else if (pivot.value > node.value && node.right) {
-        node.right = traverse(node.right);
-      }
-    }
+const insertNode = (node: TreeNode, newNode: TreeNode): TreeNode => {
+  if (newNode.value === node.value) {
+    alert("Node already exists");
     return node;
-  };
+  }
 
-  return traverse(tree);
-};
-
-const balanceTree = (tree: TreeNode): TreeNode => {
-  const unbalancedNode = detectUnbalancedNode(tree);
-  if (!unbalancedNode) return tree;
-
-  const balance = unbalancedNode.balance ?? 0;
-  const isLeftHeavy = balance > 1;
-  const isRightHeavy = balance < -1;
-
-  if (isLeftHeavy) {
-    const child = unbalancedNode.left!;
-    if ((child.balance ?? 0) >= 0) {
-      return rotateRight(unbalancedNode);
+  if (newNode.value < node.value) {
+    if (!node.left) {
+      newNode.id = `N${node.value}-${newNode.value}-L`;
+      node.left = newNode;
     } else {
-      unbalancedNode.left = rotateLeft(child);
-      return rotateRight(unbalancedNode);
+      node.left = insertNode(node.left, newNode);
     }
-  } else if (isRightHeavy) {
-    const child = unbalancedNode.right!;
-    if ((child.balance ?? 0) <= 0) {
-      return rotateLeft(unbalancedNode);
+  } else {
+    if (!node.right) {
+      newNode.id = `N${node.value}-${newNode.value}-R`;
+      node.right = newNode;
     } else {
-      unbalancedNode.right = rotateRight(child);
-      return rotateLeft(unbalancedNode);
+      node.right = insertNode(node.right, newNode);
     }
   }
 
-  return tree;
+  return balance(updateMeta(node));
 };
 
-const rotateLeft = (node: TreeNode): TreeNode => {
-  const newRoot = node.right!;
-  node.right = newRoot.left;
-  newRoot.left = node;
-
-  updateNodeMeta(node);
-  updateNodeMeta(newRoot);
-
-  return newRoot;
-};
-
-const rotateRight = (node: TreeNode): TreeNode => {
-  const newRoot = node.left!;
-  node.left = newRoot.right;
-  newRoot.right = node;
-
-  updateNodeMeta(node);
-  updateNodeMeta(newRoot);
-
-  return newRoot;
-};
-
-const updateNodeMeta = (node: TreeNode) => {
-  getNodeHeight(node);
-  getNodeBalance(node);
-};
-
-const detectUnbalancedNode = (tree: TreeNode): TreeNode | null => {
-  let unbalanced: TreeNode | null = null;
-
-  traverseTree(tree, (node, left, right) => {
-    const leftHeight = left?.height ?? 0;
-    const rightHeight = right?.height ?? 0;
-    node.height = 1 + Math.max(leftHeight, rightHeight);
-    node.balance = leftHeight - rightHeight;
-
-    if (unbalanced === null && Math.abs(node.balance) > 1) {
-      unbalanced = node;
-    }
-  });
-
-  return unbalanced;
-};
-
-const traverseTree = (
-  node: TreeNode | null,
-  callback: (node: TreeNode, left: TreeNode | null, right: TreeNode | null) => void
-): TreeNode | null => {
+const deleteNode = (node: TreeNode | null, value: number): TreeNode | null => {
   if (!node) return null;
 
-  if (node.left) node.left = traverseTree(node.left, callback);
-  if (node.right) node.right = traverseTree(node.right, callback);
+  if (value < node.value) {
+    node.left = deleteNode(node.left, value);
+  } else if (value > node.value) {
+    node.right = deleteNode(node.right, value);
+  } else {
+    if (!node.left) return node.right;
+    if (!node.right) return node.left;
 
-  callback(node, node.left ?? null, node.right ?? null);
+    const successor = findMin(node.right);
+    node.value = successor.value;
+    node.right = deleteNode(node.right, successor.value);
+  }
+
+  return balance(updateMeta(node));
+};
+
+const findMin = (node: TreeNode): TreeNode =>
+  node.left ? findMin(node.left) : node;
+
+const balance = (node: TreeNode): TreeNode => {
+  console.log(node)
+
+  if (node.balance > 1) {
+    if ((node.left?.balance ?? 0) < 0) {
+      node.left = rotateLeft(node.left!);
+    }
+    return rotateRight(node);
+  }
+
+  if (node.balance < -1) {
+    if ((node.right?.balance ?? 0) > 0) {
+      node.right = rotateRight(node.right!);
+    }
+    return rotateLeft(node);
+  }
 
   return node;
 };
 
-const getNodeHeight = (tree: TreeNode): TreeNode => {
-  return traverseTree(tree, (node, left, right) => {
-    const leftHeight = left?.height ?? 0;
-    const rightHeight = right?.height ?? 0;
-    node.height = 1 + Math.max(leftHeight, rightHeight);
-  })!;
+const rotateLeft = (x: TreeNode): TreeNode => {
+  const y = x.right!;
+  x.right = y.left;
+  y.left = x;
+  updateMeta(x);
+  return updateMeta(y);
 };
 
-const getNodeBalance = (tree: TreeNode): TreeNode => {
-  return traverseTree(tree, (node, left, right) => {
-    const leftHeight = left?.height ?? 0;
-    const rightHeight = right?.height ?? 0;
-    node.balance = leftHeight - rightHeight;
-  })!;
+const rotateRight = (y: TreeNode): TreeNode => {
+  const x = y.left!;
+  y.left = x.right;
+  x.right = y;
+  updateMeta(y);
+  return updateMeta(x);
+};
+
+const updateMeta = (node: TreeNode): TreeNode => {
+  const lh = node.left?.height ?? -1;
+  const rh = node.right?.height ?? -1;
+  node.height = 1 + Math.max(lh, rh);
+  node.balance = lh - rh;
+  return node;
 };

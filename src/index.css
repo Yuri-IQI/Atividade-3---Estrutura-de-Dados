@@ -12,11 +12,12 @@ main {
   flex: 3;
 }
 
-#insertion-menu {
-  flex: 1;
+#menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .menu {
-  display: flex;
-  justify-content: space-between;
+  flex: 1;
 }

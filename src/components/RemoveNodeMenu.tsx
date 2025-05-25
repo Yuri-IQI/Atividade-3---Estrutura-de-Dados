@@ -1,26 +1,30 @@
 import React, { useState } from 'react';
 import type { TreeNode } from '../types/TreeNode';
 
-type TreeNodeComponentProps = {
-    onInsert: (node: TreeNode) => void;
+type RemoveNodeMenuProps = {
+    onRemove: (node: TreeNode) => void;
 };
 
-export const TreeNodeComponent: React.FC<TreeNodeComponentProps> = ({ onInsert }) => {
+export const RemoveNodeMenu: React.FC<RemoveNodeMenuProps> = ({ onRemove }) => {
     const [value, setValue] = useState<number | ''>('');
 
     const handleSubmit = () => {
         if (value === '') return;
 
-        const newNode: TreeNode = {
+        const node: TreeNode = {
             value,
+            left: null,
+            right: null,
+            height: 0,
+            balance: 0
         };
 
-        onInsert(newNode);
+        onRemove(node);
         setValue('');
     };
 
     return (
-        <div className='menu' >
+        <div>
             <span>
                 <label htmlFor="node-value">Enter Node Value:</label>
                 <input
@@ -30,7 +34,7 @@ export const TreeNodeComponent: React.FC<TreeNodeComponentProps> = ({ onInsert }
                     onChange={(e) => setValue(e.target.value === '' ? '' : parseInt(e.target.value, 10))}
                 />
             </span>
-            <button onClick={handleSubmit}>Insert Node</button>
+            <button onClick={handleSubmit}>Remove Node</button>
         </div>
     );
 };

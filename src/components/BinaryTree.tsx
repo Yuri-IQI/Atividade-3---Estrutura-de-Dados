@@ -13,10 +13,10 @@ export const BinaryTree: React.FC<BinaryTreeProps> = ({ root }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
 
   useEffect(() => {
-    if (!root || !svgRef.current) return;
-
+    console.log("r:", root);
     const svg = d3.select(svgRef.current);
     svg.selectAll('*').remove();
+    if (!root || !svgRef.current) return;
 
     const hierarchyData = d3.hierarchy<TreeNode>(root, node => {
       const children: TreeNode[] = [];
